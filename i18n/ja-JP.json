@@ -936,6 +936,10 @@
 					"assign": {
 						"label": "割り当て",
 						"description": "メンバーにタスクを割り当てることができます"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

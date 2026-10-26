@@ -1327,6 +1327,10 @@
 					"assign": {
 						"label": "할당",
 						"description": "멤버에게 작업을 할당할 수 있습니다"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

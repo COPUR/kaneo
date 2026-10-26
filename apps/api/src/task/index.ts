@@ -48,6 +48,10 @@ import importTasks from "./controllers/import-tasks";
 import moveTask from "./controllers/move-task";
 import reorderTasks from "./controllers/reorder-tasks";
 import {
+  closeTargets,
+  requireTaskClosePermission,
+} from "./controllers/require-task-close-permission";
+import {
   stageTaskAssetUpload,
   finalizeStagedTaskAsset,
 } from "./controllers/stage-task-asset";
@@ -160,6 +164,7 @@ const bulkUpdateTasksRoute = createRoute({
   middleware: [
     workspaceAccess.fromTasks(),
     requireBulkTaskPermission,
+    requireTaskClosePermission(closeTargets.bulk),
     requireBulkTaskEntitlement,
   ] as const,
   request: {
@@ -250,6 +255,7 @@ const reorderTasksRoute = createRoute({
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["update"] }),
+    requireTaskClosePermission(closeTargets.reorder),
     requireEntitlement,
   ] as const,
   request: {
@@ -286,6 +292,7 @@ const createTaskRoute = createRoute({
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["create"] }),
+    requireTaskClosePermission(closeTargets.create),
     requireEntitlement,
   ] as const,
   request: {
@@ -386,6 +393,7 @@ const moveTaskRoute = createRoute({
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
+    requireTaskClosePermission(closeTargets.move),
     requireEntitlement,
   ] as const,
   request: {
@@ -421,6 +429,7 @@ const updateTaskRoute = createRoute({
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
     requireTaskAssigneePermission,
+    requireTaskClosePermission(closeTargets.update),
     requireEntitlement,
   ] as const,
   request: {
@@ -468,6 +477,7 @@ const importTasksRoute = createRoute({
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["create"] }),
+    requireTaskClosePermission(closeTargets.import),
     requireEntitlement,
   ] as const,
   request: {
@@ -520,6 +530,7 @@ const updateTaskStatusRoute = createRoute({
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
+    requireTaskClosePermission(closeTargets.status),
     requireEntitlement,
   ] as const,
   request: {

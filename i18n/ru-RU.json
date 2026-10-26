@@ -1362,6 +1362,10 @@
 					"assign": {
 						"label": "Назначение",
 						"description": "Может назначать задачи участникам"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

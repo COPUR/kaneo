@@ -936,6 +936,10 @@
 					"assign": {
 						"label": "Giao việc",
 						"description": "Có thể giao công việc cho thành viên"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

@@ -173,6 +173,11 @@ const PERMISSION_LABELS: Record<
     label: "Assign tasks",
     description: "Assign tasks to other workspace members.",
   },
+  "task:close": {
+    label: "Close tasks",
+    description:
+      "Move tasks into final columns when the instance restricts them.",
+  },
   "label:create": {
     label: "Create labels",
     description: "Add new labels to tasks in this workspace.",

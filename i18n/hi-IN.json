@@ -945,6 +945,10 @@
 					"assign": {
 						"label": "सौंपें",
 						"description": "सदस्यों को कार्य सौंप सकते हैं"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

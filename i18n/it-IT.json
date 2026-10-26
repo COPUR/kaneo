@@ -953,6 +953,10 @@
 					"assign": {
 						"label": "Assegnare",
 						"description": "Può assegnare attività ai membri"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

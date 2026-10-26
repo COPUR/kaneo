@@ -1336,6 +1336,10 @@
 					"assign": {
 						"label": "Ανάθεση",
 						"description": "Μπορεί να αναθέτει εργασίες σε μέλη"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

@@ -945,6 +945,10 @@
 					"assign": {
 						"label": "Təyin et",
 						"description": "Tapşırıqları üzvlərə təyin edə bilər"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

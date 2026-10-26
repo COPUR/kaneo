@@ -1336,6 +1336,10 @@
 					"assign": {
 						"label": "Atama",
 						"description": "Talepleri üyelere atayabilir"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {
