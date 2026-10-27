@@ -1335,6 +1335,10 @@
 					"assign": {
 						"label": "Tugaskan tugas",
 						"description": "Tugaskan tugas kepada anggota ruang kerja lain."
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

@@ -26,6 +26,7 @@ describe("@kaneo/permissions statement surface", () => {
       "update",
       "delete",
       "assign",
+      "close",
     ]);
     expect(statement.label).toEqual(["create", "read", "update", "delete"]);
     expect(statement.workspace).toEqual([
@@ -59,6 +60,7 @@ describe("built-in role privileges", () => {
     expect(member.statements.task).toContain("create");
     expect(member.statements.task).toContain("update");
     expect(member.statements.task).not.toContain("delete");
+    expect(member.statements.task).not.toContain("close");
     expect(member.statements.project).toContain("create");
     expect(member.statements.project).not.toContain("delete");
     expect(member.statements.workspace).toEqual(["read"]);
@@ -67,6 +69,7 @@ describe("built-in role privileges", () => {
   it("admin can delete tasks and manage workspace settings but cannot delete the workspace", () => {
     expect(admin.statements.task).toContain("delete");
     expect(admin.statements.task).toContain("assign");
+    expect(admin.statements.task).toContain("close");
     expect(admin.statements.project).toContain("delete");
     expect(admin.statements.project).toContain("share");
     expect(admin.statements.workspace).toContain("manage_settings");
@@ -75,7 +78,14 @@ describe("built-in role privileges", () => {
 
   it("owner has every Kaneo resource action including workspace:delete", () => {
     expect(owner.statements.task).toEqual(
-      expect.arrayContaining(["create", "read", "update", "delete", "assign"]),
+      expect.arrayContaining([
+        "create",
+        "read",
+        "update",
+        "delete",
+        "assign",
+        "close",
+      ]),
     );
     expect(owner.statements.project).toEqual(
       expect.arrayContaining(["create", "read", "update", "delete", "share"]),

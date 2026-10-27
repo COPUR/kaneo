@@ -98,6 +98,7 @@ only the small `{"type":"ping"}` text keepalive, with a 64-byte message limit.
 
 Name | Description | Default |
 --- | --- | --- |
+| `KANEO_RESTRICT_FINAL_COLUMNS` | Require the `task:close` permission to move a task into a final column, such as Done. Owners and admins have it by default; members do not. Grant it to a custom role to let only that role close work. Workspaces created earlier keep their stored admin role, so add **Close** to it under Settings → Roles if admins should keep closing work. Integrations that close tasks from webhooks are not affected. | `false` |
 | `DISABLE_WORKSPACE_CREATION` | Allow only instance administrators to create workspaces. Workspace ownership or a workspace admin role does not grant this instance-wide permission. | `false` |
 | `DISABLE_GUEST_ACCESS` | Disable anonymous/guest sign-in. Guests are also blocked before initial instance setup and when registration, local registration, or the local login form is disabled. | `false` |
 | `DISABLE_REGISTRATION` | Disable public user registration. When set to `true`, the sign-up option will not be shown on the sign-in page and new user creation is blocked (including via SSO). **Note:** Invited password signups must present the matching invitation link. OAuth, OTP, and magic-link signups may match an invitation by email only after that email has been verified. Sign-in emails (OTP codes and magic links) are only sent to existing accounts or pending invitations. The first non-guest user can complete initial instance setup. | `false` |

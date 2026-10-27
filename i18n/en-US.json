@@ -1176,6 +1176,10 @@
 					"assign": {
 						"label": "Assign",
 						"description": "Can assign tasks to members"
+					},
+					"close": {
+						"label": "Close",
+						"description": "Can move tasks into final columns when closing is restricted"
 					}
 				},
 				"label": {

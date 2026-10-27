@@ -1282,6 +1282,10 @@
 					"assign": {
 						"label": "Toewijzen",
 						"description": "Kan taken toewijzen aan leden"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

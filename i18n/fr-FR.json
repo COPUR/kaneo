@@ -1352,6 +1352,10 @@
 					"assign": {
 						"label": "Assigner",
 						"description": "Peut assigner des tâches aux membres"
+					},
+					"close": {
+						"description": "Can move tasks into final columns when closing is restricted",
+						"label": "Close"
 					}
 				},
 				"label": {

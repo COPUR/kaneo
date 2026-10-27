@@ -1,0 +1,52 @@
+# Kaneo for agent squads: one container (web + API) and PostgreSQL.
+# Runs on a laptop or any small VM. Redis is not needed for one instance.
+#
+#   cp .env.example .env    # then set AUTH_SECRET and POSTGRES_PASSWORD
+#   docker compose up -d --build
+#   node seed.mjs           # creates the tribe, squads, agents and API keys
+#
+# On a VM, set KANEO_CLIENT_URL to the public URL (without :5173).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=kaneo
+      - POSTGRES_USER=kaneo
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaneo -d kaneo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kaneo:
+    # Built from this fork so the task:close rule is included.
+    build:
+      context: ../..
+      dockerfile: Dockerfile.kaneo
+    ports:
+      - "${KANEO_PORT:-5173}:5173"
+    environment:
+      - KANEO_CLIENT_URL=${KANEO_CLIENT_URL:-http://localhost:5173}
+      - AUTH_SECRET=${AUTH_SECRET:?set AUTH_SECRET in .env}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=kaneo
+      - POSTGRES_USER=kaneo
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # Only roles with task:close (the owner, admins and the cicd-agent role)
+      # can move a task into a final column such as Done.
+      - KANEO_RESTRICT_FINAL_COLUMNS=true
+      # Agents sign in with API keys; no SMTP or guest accounts needed.
+      - DISABLE_EMAIL_OTP_SIGN_IN=true
+      - DISABLE_GUEST_ACCESS=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
