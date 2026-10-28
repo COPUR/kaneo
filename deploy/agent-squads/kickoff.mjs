@@ -6,15 +6,15 @@
 // which cannot assign, so the Agent status field marks the claim instead.
 // Run after backlog.mjs; safe to re-run.
 //
-// From here the agents work through the Kaneo MCP server with the same keys,
-// and only the CI/CD agent can move a card to Done.
+// From here the agents work through the Kaneo MCP server with the same keys
+// (run-squads.sh), and only the CI/CD agent can move a card to Done.
 
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { client, loadEnv } from "./lib.mjs";
-import { pickNext } from "./pick.mjs";
-import { squads, tribe } from "./squads.mjs";
+import { currentOrClaim, openBoard } from "./board.mjs";
+import { loadEnv } from "./lib.mjs";
+import { squads } from "./squads.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 loadEnv(join(here, ".env"));
@@ -24,50 +24,10 @@ const agents = JSON.parse(
 
 async function kickoff(squad) {
   const agent = agents[`${squad.id}-agent`];
-  const call = client({ apiKey: agent.apiKey });
-  const { data: workspaces } = await call("GET", "/workspace");
-  const workspace = workspaces.find((w) => w.slug === tribe.slug);
-  const { data: projects } = await call(
-    "GET",
-    `/project?workspaceId=${workspace.id}`,
-  );
-  const project = projects.find((p) => p.slug === squad.key);
-  const { data: board } = await call(
-    "GET",
-    `/task/tasks/${project.id}?limit=100`,
-  );
-  const columns = board.data?.columns ?? [];
-  const tasksIn = (slug) => columns.find((c) => c.slug === slug)?.tasks ?? [];
-
-  const [current] = tasksIn("in-progress");
-  if (current) return `${squad.key}  keeps    ${current.title}`;
-
-  const backlog = tasksIn("to-do");
-  const blockers = new Map();
-  for (const task of backlog) {
-    const { data } = await call("GET", `/task-relation/${task.id}`);
-    blockers.set(task.id, data ?? []);
-  }
-  const next = pickNext(backlog, blockers);
-  if (!next) return `${squad.key}  idle     nothing unblocked in Backlog`;
-
-  await call("PUT", `/task/status/${next.id}`, { status: "in-progress" });
-  const { data: fields } = await call(
-    "GET",
-    `/custom-field/project/${project.id}`,
-  );
-  const status = fields.find((f) => f.name === "Agent status");
-  if (status) {
-    await call("PUT", "/custom-field/value", {
-      taskId: next.id,
-      fieldId: status.id,
-      value: "Claimed",
-    });
-  }
-  await call("POST", `/comment/${next.id}`, {
-    content: `${agent.name} claimed this card. Work happens on a branch; the CI/CD agent merges and closes it.`,
-  });
-  return `${squad.key}  claimed  ${next.title}`;
+  const board = await openBoard(agent, squad.key);
+  const { task, claimed } = await currentOrClaim(board, agent);
+  if (!task) return `${squad.key}  idle     nothing unblocked in Backlog`;
+  return `${squad.key}  ${claimed ? "claimed" : "keeps  "}  ${task.title}`;
 }
 
 for (const squad of squads) {

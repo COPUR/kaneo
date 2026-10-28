@@ -68,4 +68,5 @@ Done.
   Web:       http://localhost:5173
   Sign in:   $owner_email / $owner_password  (also in deploy/agent-squads/.env)
   MCP ports: http://localhost:7100/mcp (CI/CD) and 7101-7108 (NAV CON ROA TEL PLT INV PAY SEC)
+  Squads on their own: ./run-squads.sh   (stop: ./run-squads.sh stop)
 EOF
