@@ -67,6 +67,21 @@ export function safeJson(text) {
   }
 }
 
+// The API needs a while after `docker compose up` (migrations, nginx).
+export async function waitForApi({ timeoutMs = 180_000 } = {}) {
+  const { apiUrl } = urls();
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      if ((await fetch(`${apiUrl}/health`)).ok) return;
+    } catch {
+      // Not listening yet.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error(`Kaneo API did not answer at ${apiUrl}/health`);
+}
+
 export async function signIn(call, user, { signUp = false } = {}) {
   const res = await call("POST", "/auth/sign-in/email", user, {
     allow: [401, 403],
