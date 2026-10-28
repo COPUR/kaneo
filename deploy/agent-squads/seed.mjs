@@ -12,7 +12,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { client, loadEnv, required, signIn, urls } from "./lib.mjs";
+import { client, loadEnv, required, signIn, urls, waitForApi } from "./lib.mjs";
 import { squads, tribe } from "./squads.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -229,6 +229,7 @@ function mcpConfig(agent) {
 }
 
 async function main() {
+  await waitForApi();
   const call = client();
   await signIn(call, owner, { signUp: true });
   const workspace = await ensureWorkspace(call);

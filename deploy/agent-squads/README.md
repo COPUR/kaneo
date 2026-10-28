@@ -44,20 +44,28 @@ CI/CD agent can merge, so that path still belongs to it.
 
 ## Run it
 
-Needs Docker and Node 24+. Works the same on a laptop or a small VM.
+Needs Docker and Node 24+. Works the same on a laptop or a small VM. Clone
+`EV_PNC_docs` next to this repository for the backlog, then:
 
 ```bash
 cd deploy/agent-squads
-cp .env.example .env          # set AUTH_SECRET, POSTGRES_PASSWORD, KANEO_OWNER_PASSWORD
-docker compose up -d --build
-node seed.mjs                 # tribe, squads, agents, API keys, MCP configs
-node verify.mjs               # optional smoke test of the close rule
-node backlog.mjs ../../../EV_PNC_docs/docs/architecture/kafka-backend/kanban/*.csv
-node kickoff.mjs              # each squad agent pulls its first card
-docker compose -f compose.yml -f .generated/compose.mcp.yml up -d   # agent MCP ports
+./setup.sh
 ```
 
-Open http://localhost:5173 and sign in as `KANEO_OWNER_EMAIL`. On a VM, set
+`setup.sh` stops at the first failing step and can be re-run. It runs, in order:
+
+1. `node init-env.mjs`: creates `.env` and fills `AUTH_SECRET`,
+   `POSTGRES_PASSWORD` and `KANEO_OWNER_PASSWORD` when empty. Set values are kept.
+2. `docker compose up -d --build`
+3. `node seed.mjs`: tribe, squads, agents, API keys and MCP configs (waits for the API).
+4. `node verify.mjs`: smoke test of the close rule.
+5. `node backlog.mjs <EV_PNC_docs kanban CSVs>`: pass another `EV_PNC_docs`
+   path as `./setup.sh path/to/EV_PNC_docs`.
+6. `node kickoff.mjs`: each squad agent pulls its first card.
+7. `docker compose -f compose.yml -f .generated/compose.mcp.yml up -d`: agent MCP ports.
+
+Open http://localhost:5173 and sign in as `KANEO_OWNER_EMAIL` with
+`KANEO_OWNER_PASSWORD` from `.env`. On a VM, set
 `KANEO_CLIENT_URL` to its public URL first.
 
 `seed.mjs` can be re-run: it reuses what exists and only creates what is
