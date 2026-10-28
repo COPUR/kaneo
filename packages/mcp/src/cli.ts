@@ -1,5 +1,6 @@
 import { stdin as input } from "node:process";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { httpOptionsFromEnv, startHttpServer } from "./http.js";
 import { runInstall } from "./install/index.js";
 import { createMcpServer } from "./server.js";
 
@@ -13,6 +14,14 @@ export async function runCli(): Promise<void> {
   }
   if (argv[0] === "install" || argv[0] === "setup") {
     await runInstall(argv.slice(1));
+    return;
+  }
+  if (argv[0] === "serve-http") {
+    const options = httpOptionsFromEnv();
+    startHttpServer(options);
+    console.error(
+      `kaneo-mcp: listening on http://${options.host}:${options.port}/mcp`,
+    );
     return;
   }
   if (argv[0] !== undefined) {
@@ -46,6 +55,9 @@ Usage:
   kaneo-mcp              Same: installer in a TTY; MCP server when stdin is piped
   kaneo-mcp install      Register in Cursor / Claude / a custom path (explicit)
   kaneo-mcp serve        Run the MCP server (use from a terminal to test stdio)
+  kaneo-mcp serve-http   Run it over Streamable HTTP at /mcp, acting as KANEO_API_KEY
+                         (KANEO_MCP_HOST, default 127.0.0.1; KANEO_MCP_PORT, default 3100;
+                         KANEO_MCP_ALLOWED_HOSTS, default localhost,127.0.0.1)
   kaneo-mcp help
 
 Options:

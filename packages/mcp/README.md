@@ -113,6 +113,15 @@ On the first tool call that needs Kaneo, the server:
 
 For headless or sandboxed environments where opening a browser is impractical, set `KANEO_API_KEY` to a key created under Settings → Account → Developer. The server sends it as a Bearer token on every request and skips the device flow entirely, so no token is cached to disk.
 
+### Over HTTP
+
+`kaneo-mcp serve-http` serves the same tools over Streamable HTTP at `/mcp`, for agents that connect to a URL instead of starting a process. It needs `KANEO_API_KEY`, and every caller acts as that key, so it listens on `127.0.0.1` by default and answers only requests whose `Host` is in `KANEO_MCP_ALLOWED_HOSTS` (default `localhost,127.0.0.1`). Set `KANEO_MCP_PORT` (default `3100`) and, inside a container, `KANEO_MCP_HOST=0.0.0.0` with the port published on loopback only.
+
+```bash
+KANEO_API_URL=http://localhost:1337 KANEO_API_KEY=... KANEO_MCP_PORT=7101 kaneo-mcp serve-http
+claude mcp add --transport http kaneo http://localhost:7101/mcp
+```
+
 ## Tools
 
 - Session: `whoami`, `list_workspaces`, `list_workspace_members`, `list_notifications`

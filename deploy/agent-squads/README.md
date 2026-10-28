@@ -44,14 +44,17 @@ CI/CD agent can merge, so that path still belongs to it.
 
 ## Run it
 
-Needs Docker. Works the same on a laptop or a small VM.
+Needs Docker and Node 24+. Works the same on a laptop or a small VM.
 
 ```bash
 cd deploy/agent-squads
 cp .env.example .env          # set AUTH_SECRET, POSTGRES_PASSWORD, KANEO_OWNER_PASSWORD
 docker compose up -d --build
-node seed.mjs                 # Node 24+
+node seed.mjs                 # tribe, squads, agents, API keys, MCP configs
 node verify.mjs               # optional smoke test of the close rule
+node backlog.mjs ../../../EV_PNC_docs/docs/architecture/kafka-backend/kanban/*.csv
+node kickoff.mjs              # each squad agent pulls its first card
+docker compose -f compose.yml -f .generated/compose.mcp.yml up -d   # agent MCP ports
 ```
 
 Open http://localhost:5173 and sign in as `KANEO_OWNER_EMAIL`. On a VM, set
@@ -61,10 +64,45 @@ Open http://localhost:5173 and sign in as `KANEO_OWNER_EMAIL`. On a VM, set
 missing. It writes agent passwords, API keys and MCP configs to `.generated/`
 (git-ignored, readable only by you). Keep that folder private.
 
+## Ports
+
+| What | Address | Who |
+| --- | --- | --- |
+| Web app | http://localhost:5173 | Product owner (people) |
+| REST API | http://localhost:5173/api | Scripts, `x-api-key: <agent key>` |
+| CI/CD agent MCP | http://localhost:7100/mcp | Only agent that closes work |
+| Squad agent MCP | http://localhost:7101/mcp to 7108/mcp | NAV, CON, ROA, TEL, PLT, INV, PAY, SEC in that order |
+
+Each MCP port acts as one agent, so the ports are published on `127.0.0.1`
+only. Set `KANEO_MCP_BASE_PORT` before `seed.mjs` to move the range.
+
+## Backlog and iterations
+
+The squads work agile: small batches, pull instead of push, one card in
+progress per squad, and the product owner deciding on DEC.
+
+- [`repos.mjs`](./repos.mjs) says which squad owns which EV PnC repository.
+  Platform owns docs, infra, infra-modules and the simulator; Roaming the OCPI
+  and hub repositories; Telemetry telemetry and pilot analytics; Consent the
+  `EV_PnC_Consent_*` family. Navigation, Invoicing and Payments get theirs from
+  backlog cards.
+- [`backlog.mjs`](./backlog.mjs) loads CSVs in the `EV_PNC_docs` kanban shape
+  onto the owning squad's board, product-owner gates onto DEC, `Depends on`
+  as "blocks" relations, and a walking-skeleton card for every repository.
+  `CURRENT_ITERATION` (default `I3`) makes that iteration's cards high
+  priority, the next one medium and later ones low.
+- [`kickoff.mjs`](./kickoff.mjs) has each squad agent, with its own key, pull
+  the most urgent unblocked card into In Progress and set **Agent status** to
+  Claimed. A squad that already has a card in progress keeps it.
+
 ## Connect agents through MCP
 
-Each agent gets `.generated/<agent>.mcp.json`, which runs the Kaneo MCP server
-(`@kaneo/mcp`) with that agent's API key. For Claude Code:
+Each agent gets two configs in `.generated/`:
+
+- `<agent>.mcp-http.json` points at the agent's MCP port (see Ports). For
+  Claude Code: `claude mcp add --transport http kaneo http://localhost:7102/mcp`.
+- `<agent>.mcp.json` starts the Kaneo MCP server (`@kaneo/mcp`) over stdio
+  with that agent's API key, for clients without HTTP support:
 
 ```bash
 claude mcp add-json kaneo "$(jq -c .mcpServers.kaneo .generated/consent-agent.mcp.json)"
