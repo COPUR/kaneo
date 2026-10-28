@@ -25,7 +25,7 @@ fi
 step "Secrets in .env"
 node init-env.mjs
 
-step "Start Kaneo (first build takes a few minutes)"
+step "Start Kaneo (first build takes a few minutes; do not sign up in the browser yet)"
 docker compose up -d --build
 
 step "Seed tribe, squads and agents"
@@ -50,10 +50,11 @@ step "Start the agent MCP ports"
 docker compose -f compose.yml -f .generated/compose.mcp.yml up -d
 
 owner_email="$(sed -n 's/^KANEO_OWNER_EMAIL=//p' .env)"
+owner_password="$(sed -n 's/^KANEO_OWNER_PASSWORD=//p' .env)"
 cat <<EOF
 
 Done.
-  Web:       http://localhost:5173  (sign in as $owner_email,
-             password: KANEO_OWNER_PASSWORD in deploy/agent-squads/.env)
+  Web:       http://localhost:5173
+  Sign in:   $owner_email / $owner_password  (also in deploy/agent-squads/.env)
   MCP ports: http://localhost:7100/mcp (CI/CD) and 7101-7108 (NAV CON ROA TEL PLT INV PAY SEC)
 EOF
