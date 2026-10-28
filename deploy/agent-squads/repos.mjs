@@ -72,6 +72,74 @@ export const repos = [
     squad: "payments",
     chapter: "chapter:backend",
   },
+  // Planned repositories from the v2 backlog (no repository yet): routed so
+  // their cards do not all fall back to the Platform board.
+  {
+    repo: "EV_PNC_mobile",
+    planned: true,
+    squad: "navigation",
+    chapter: "chapter:frontend",
+  },
+  {
+    repo: "EV_PNC_plugcharge",
+    planned: true,
+    squad: "payments",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PNC_policy-engine",
+    planned: true,
+    squad: "payments",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PNC_pricing",
+    planned: true,
+    squad: "payments",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PNC_national-data",
+    planned: true,
+    squad: "telemetry",
+    chapter: "chapter:data",
+  },
+  {
+    repo: "EV_PNC_national-consent",
+    planned: true,
+    squad: "consent",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PNC_api-gateway",
+    planned: true,
+    squad: "platform",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PnC_Consent_notices",
+    planned: true,
+    squad: "consent",
+    chapter: "chapter:frontend",
+  },
+  {
+    repo: "EV_PnC_Consent_audit",
+    planned: true,
+    squad: "consent",
+    chapter: "chapter:backend",
+  },
+  {
+    repo: "EV_PnC_Consent_tenant-portal",
+    planned: true,
+    squad: "consent",
+    chapter: "chapter:frontend",
+  },
+  {
+    repo: "EV_PnC_Consent_edevlet-bridge",
+    planned: true,
+    squad: "consent",
+    chapter: "chapter:backend",
+  },
 ];
 
 // Backlog owners that map to a squad regardless of the repository.
