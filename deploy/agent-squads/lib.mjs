@@ -88,6 +88,14 @@ export async function signIn(call, user, { signUp = false } = {}) {
   });
   if (res.status === 200) return res.data.user;
   if (!signUp) throw new Error(`Cannot sign in as ${user.email}`);
-  const created = await call("POST", "/auth/sign-up/email", user);
+  const created = await call("POST", "/auth/sign-up/email", user, {
+    allow: [400, 422],
+  });
+  if (created.status !== 200) {
+    // The account exists with another password, e.g. signed up in the browser.
+    throw new Error(
+      `${user.email} exists but its password is not KANEO_OWNER_PASSWORD in .env. Put that account's password in .env and re-run.`,
+    );
+  }
   return created.data.user;
 }

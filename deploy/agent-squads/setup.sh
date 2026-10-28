@@ -25,8 +25,20 @@ fi
 step "Secrets in .env"
 node init-env.mjs
 
-step "Start Kaneo (first build takes a few minutes)"
+step "Start Kaneo (first build takes a few minutes; do not sign up in the browser yet)"
 docker compose up -d --build
+
+owner_email="$(sed -n 's/^KANEO_OWNER_EMAIL=//p' .env)"
+
+step "Make $owner_email an instance admin if the account already exists"
+# Seeding creates agent accounts, which needs instance admin. Kaneo makes the
+# first account admin; this covers an owner who signed up after someone else.
+node --input-type=module -e 'import { loadEnv, waitForApi } from "./lib.mjs"; loadEnv(".env"); await waitForApi();'
+docker compose exec -T postgres psql -q -U kaneo -d kaneo -v ON_ERROR_STOP=1 -v email="$owner_email" <<'SQL'
+UPDATE "user" SET role = 'admin'
+WHERE email = :'email'
+  AND NOT ('admin' = ANY (string_to_array(coalesce(role, ''), ',')));
+SQL
 
 step "Seed tribe, squads and agents"
 node seed.mjs
@@ -49,11 +61,11 @@ node kickoff.mjs
 step "Start the agent MCP ports"
 docker compose -f compose.yml -f .generated/compose.mcp.yml up -d
 
-owner_email="$(sed -n 's/^KANEO_OWNER_EMAIL=//p' .env)"
+owner_password="$(sed -n 's/^KANEO_OWNER_PASSWORD=//p' .env)"
 cat <<EOF
 
 Done.
-  Web:       http://localhost:5173  (sign in as $owner_email,
-             password: KANEO_OWNER_PASSWORD in deploy/agent-squads/.env)
+  Web:       http://localhost:5173
+  Sign in:   $owner_email / $owner_password  (also in deploy/agent-squads/.env)
   MCP ports: http://localhost:7100/mcp (CI/CD) and 7101-7108 (NAV CON ROA TEL PLT INV PAY SEC)
 EOF
