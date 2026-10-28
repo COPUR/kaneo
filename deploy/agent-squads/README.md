@@ -103,6 +103,66 @@ progress per squad, and the product owner deciding on DEC.
   the most urgent unblocked card into In Progress and set **Agent status** to
   Claimed. A squad that already has a card in progress keeps it.
 
+## Let the squads work on their own
+
+[`run-squads.sh`](./run-squads.sh) starts one headless Claude Code agent per
+squad and the CI/CD agent, in the background, with a log each. Needs the
+`claude` CLI (signed in), `gh` (signed in as an account that can push to the
+EV PnC repositories) and Kaneo running from `setup.sh`.
+
+```bash
+./run-squads.sh            # all squads and the CI/CD agent
+./run-squads.sh CON TEL    # only these squads (and the CI/CD agent)
+./run-squads.sh status     # who is running, last log line each
+./run-squads.sh logs CON   # follow one log (.runner/logs/<KEY>.log)
+./run-squads.sh stop       # stop every agent now
+```
+
+Each squad agent ([`runner/squad.mjs`](./runner/squad.mjs)) loops:
+
+1. Takes its card in progress, or claims the most urgent unblocked Backlog
+   card (WIP 1, the same rule as `kickoff.mjs`).
+2. Clones the card's repository (`**Repository:**` in the card, else the
+   squad's first repository from `repos.mjs`) next to this checkout, and adds a
+   worktree for the card under `.squad-worktrees/<KEY>/`.
+3. Runs `claude -p` there with the squad's system prompt
+   ([`runner/prompt.mjs`](./runner/prompt.mjs)) and its own MCP port, so it
+   acts on Kaneo as that squad's agent. It may edit, test and commit, but not
+   push, use `gh` or merge.
+4. With commits, the runner pushes the branch, opens the pull request, fills
+   **Pull request**, moves the card to In Review and sets **Agent status** to
+   Handed to CI/CD. A decision the squad cannot take goes to DEC and the card to
+   Decision Needed. A session without commits, or one that fails, also moves
+   the card to Decision Needed, so a person looks.
+
+The CI/CD agent ([`runner/cicd.mjs`](./runner/cicd.mjs)) checks In Review on
+every squad board. It merges (squash, pinned to the head commit) and moves the
+card to Done only when the pull request is open and not a draft, checks are
+green, it is mergeable, no review asks for changes or an approval is still
+required, and the approver agent's rules pass. When the rules leave it to a
+person, it labels the pull request `needs-human` and waits; approving it on
+GitHub and removing the label lets it merge. The approver workflow is
+unchanged.
+
+Caps, in `.env` or the environment:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `SQUAD_MAX_CARDS` | 5 | Cards each squad agent finishes before it stops |
+| `SQUAD_RUN_BUDGET_USD` | 5 | `claude --max-budget-usd` for one card |
+| `SQUAD_TOTAL_BUDGET_USD` | 25 | Spend per squad agent before it stops |
+| `SQUAD_RUN_TIMEOUT_MIN` | 45 | A session running longer is stopped |
+| `SQUAD_IDLE_SECONDS` | 300 | Wait before looking at an empty Backlog again |
+| `CICD_INTERVAL_SECONDS` | 120 | How often the CI/CD agent looks at In Review |
+| `CICD_MAX_MERGES` | 40 | Merges before the CI/CD agent stops |
+| `SQUAD_REPOS_DIR` | the folder holding this checkout | Where repositories are cloned |
+| `SQUAD_MODEL` | Claude Code's default | `claude --model` for the squads |
+
+All agents share the `gh` account of the machine, so on GitHub the "only the
+CI/CD agent merges" rule is kept by the runners (squad sessions cannot run
+`gh` or `git push`). Apply `github/single-committer.sh` to have GitHub enforce
+it too.
+
 ## Connect agents through MCP
 
 Each agent gets two configs in `.generated/`:
