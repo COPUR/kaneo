@@ -61,6 +61,11 @@ node kickoff.mjs
 step "Start the agent MCP ports"
 docker compose -f compose.yml -f .generated/compose.mcp.yml up -d
 
+if grep -q '^SLACK_APP_TOKEN=xapp-' .env; then
+  step "Start the Slack listener agent"
+  docker compose --profile slack up -d slack-listener
+fi
+
 owner_password="$(sed -n 's/^KANEO_OWNER_PASSWORD=//p' .env)"
 cat <<EOF
 
