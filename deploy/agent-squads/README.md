@@ -163,6 +163,15 @@ CI/CD agent merges" rule is kept by the runners (squad sessions cannot run
 `gh` or `git push`). Apply `github/single-committer.sh` to have GitHub enforce
 it too.
 
+## Listen to Slack
+
+[`slack/`](./slack/README.md) is a Slack listener agent. A mention, a direct
+message or a post in a listed channel becomes a card on the right squad board
+(decisions on DEC), and the bot replies in the thread with the link. Thread
+replies become card comments. It is its own Kaneo agent (`slack-agent`, a
+member), so it can never close a card. It uses Socket Mode, so no public URL;
+setup steps and the app manifest are in [`slack/README.md`](./slack/README.md).
+
 ## Connect agents through MCP
 
 Each agent gets two configs in `.generated/`:
