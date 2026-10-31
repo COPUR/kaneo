@@ -12,6 +12,7 @@
 //
 // Safe to re-run: a card whose "[Id]" title prefix exists is skipped.
 // CURRENT_ITERATION (default I3) sets which cards are high priority.
+// WALKING_SKELETONS=0 skips the per-repository walking-skeleton cards.
 
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -84,7 +85,9 @@ async function main() {
     .flatMap((file) => parseCsv(readFileSync(file, "utf8")));
   const cards = [
     ...rows.map((row) => planCard(row, { currentIteration })),
-    ...walkingSkeletons({ currentIteration }),
+    ...(process.env.WALKING_SKELETONS === "0"
+      ? []
+      : walkingSkeletons({ currentIteration })),
   ];
 
   const { byKey, existing } = await boards(call, workspace.id);
