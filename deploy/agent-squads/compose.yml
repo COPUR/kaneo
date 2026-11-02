@@ -50,5 +50,20 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Slack listener agent (slack/listener.mjs). Off unless asked for:
+  #   docker compose --profile slack up -d slack-listener
+  # Reads SLACK_* from .env and its API key from .generated/agents.json.
+  slack-listener:
+    image: kaneo-agent-squads:local
+    profiles: ["slack"]
+    working_dir: /agent-squads
+    command: ["node", "slack/listener.mjs"]
+    environment:
+      - KANEO_API_URL=http://kaneo:5173/api
+    volumes:
+      - ./:/agent-squads
+    depends_on: [kaneo]
+    restart: unless-stopped
+
 volumes:
   postgres_data:
