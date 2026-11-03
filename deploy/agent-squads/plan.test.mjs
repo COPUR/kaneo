@@ -69,3 +69,23 @@ test("walking skeletons cover only repositories that exist", () => {
     cards.some((c) => c.id === "WS-Consent-registry" && c.board === "CON"),
   );
 });
+
+test("cards of planned repositories go to the owning squad, not Platform", () => {
+  const row = (Repository) => ({
+    Id: "T-01",
+    Title: "Task",
+    Iteration: "I1",
+    Repository,
+    Owner: "Backend agent",
+    "Human gate": "no",
+  });
+  assert.equal(planCard(row("EV_PNC_mobile"), opts).board, "NAV");
+  assert.equal(planCard(row("EV_PNC_plugcharge"), opts).board, "PAY");
+  assert.equal(planCard(row("EV_PNC_national-data"), opts).board, "TEL");
+  assert.equal(planCard(row("EV_PnC_Consent_notices"), opts).board, "CON");
+});
+
+test("planned repositories get no walking skeleton", () => {
+  const ids = walkingSkeletons(opts).map((c) => c.id);
+  assert.ok(!ids.some((id) => /mobile|plugcharge/i.test(id)));
+});
